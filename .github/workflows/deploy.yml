@@ -14,12 +14,17 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
+# Node 20 action runtimes are removed from runners on 2026-09-16; this opts
+# the remaining v-latest actions into Node 24 ahead of the 2026-06-16 default.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 20
           cache: npm
