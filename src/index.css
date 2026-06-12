@@ -1,0 +1,54 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/space-grotesk';
+@import '@fontsource-variable/jetbrains-mono';
+
+/*
+  Token system. Dark theme locked at the page level (carried over from the
+  existing brand). Radius rule: surfaces 16px, interactive pill, inputs 12px.
+  Single accent: violet, desaturated from the original brand #915EFF.
+*/
+@theme {
+  --font-sans: 'Space Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+
+  --color-base: #0b0b10;
+  --color-raised: #14141b;
+  --color-edge: #26262e;
+  --color-ink: #f1f0f5;
+  --color-muted: #9b99a8;
+  --color-accent: #a78bfa;
+  --color-accent-deep: #6d4fd1;
+}
+
+html {
+  background-color: var(--color-base);
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background-color: var(--color-base);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-accent-deep);
+  color: var(--color-ink);
+}
+
+.marquee-mask {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 12%,
+    black 88%,
+    transparent
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
