@@ -19,22 +19,38 @@ export default function About() {
         {CAPABILITIES.map((cap) => (
           <li
             key={cap.title}
-            className="reveal group border-b border-line py-8 transition-colors duration-300 md:px-8 md:odd:border-r md:first:pl-0 md:[&:nth-child(2)]:pr-0"
+            onPointerMove={(e) => {
+              const el = e.currentTarget
+              const r = el.getBoundingClientRect()
+              el.style.setProperty('--spot-x', `${e.clientX - r.left}px`)
+              el.style.setProperty('--spot-y', `${e.clientY - r.top}px`)
+            }}
+            className="reveal group relative overflow-hidden border-b border-line py-8 transition-colors duration-300 md:px-8 md:odd:border-r md:first:pl-0 md:[&:nth-child(2)]:pr-0"
           >
-            <div className="flex items-start justify-between gap-4">
-              <h3 className="text-xl font-medium tracking-tight transition-colors duration-300 group-hover:text-accent">
-                {cap.title}
-              </h3>
-              <span
-                aria-hidden
-                className="mt-1 font-mono text-sm text-line transition-all duration-300 group-hover:translate-x-1 group-hover:text-accent"
-              >
-                &gt;
-              </span>
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              style={{
+                background:
+                  'radial-gradient(320px circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(167, 139, 250, 0.1), transparent 70%)',
+              }}
+            />
+            <div className="relative z-10">
+              <div className="flex items-start justify-between gap-4">
+                <h3 className="text-xl font-medium tracking-tight transition-colors duration-300 group-hover:text-accent">
+                  {cap.title}
+                </h3>
+                <span
+                  aria-hidden
+                  className="mt-1 font-mono text-sm text-line transition-all duration-300 group-hover:translate-x-1 group-hover:text-accent"
+                >
+                  &gt;
+                </span>
+              </div>
+              <p className="mt-3 max-w-md leading-relaxed text-muted">
+                {cap.description}
+              </p>
             </div>
-            <p className="mt-3 max-w-md leading-relaxed text-muted">
-              {cap.description}
-            </p>
           </li>
         ))}
       </ul>

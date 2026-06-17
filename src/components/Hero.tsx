@@ -7,6 +7,7 @@ import {
 } from 'motion/react'
 import { ArrowDown } from '@phosphor-icons/react'
 import Button from './Button'
+import HeroSceneLazy from './HeroSceneLazy'
 import { HERO } from '../data/content'
 
 const nameLines = HERO.name.split(' ')
@@ -56,6 +57,16 @@ export default function Hero() {
         <div className="aurora absolute -left-[10%] top-[8%] h-[42rem] w-[42rem] rounded-full bg-accent-deep/22 blur-[150px]" />
         <div className="aurora absolute -right-[12%] bottom-[2%] h-[34rem] w-[34rem] rounded-full bg-accent/12 blur-[140px]" />
       </motion.div>
+
+      {/* WebGL centerpiece (desktop + motion only); aurora above is the fallback. */}
+      <HeroSceneLazy />
+
+      {/* Keep the headline legible over the scene: solid on the left, clear on
+          the right where the blob sits. */}
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-r from-bg via-bg/85 to-bg/20 md:to-transparent"
+      />
 
       <motion.div
         style={reduceMotion ? undefined : { y: contentY, opacity: contentOpacity }}

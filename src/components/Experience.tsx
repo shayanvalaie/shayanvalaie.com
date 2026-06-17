@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import {
   motion,
   useScroll,
+  useSpring,
   useTransform,
   useReducedMotion,
   type MotionValue,
@@ -31,6 +32,10 @@ function StackCard({
   const targetScale = 1 - (total - 1 - index) * 0.04
   const scale = useTransform(progress, [index / total, 1], [1, targetScale])
 
+  // Subtle 3D tilt toward the cursor, spring-smoothed so it has momentum.
+  const rotateX = useSpring(0, { stiffness: 150, damping: 18, mass: 0.5 })
+  const rotateY = useSpring(0, { stiffness: 150, damping: 18, mass: 0.5 })
+
   useEffect(() => {
     if (reduceMotion) return
     const mq = window.matchMedia('(min-width: 768px)')
@@ -40,10 +45,26 @@ function StackCard({
     return () => mq.removeEventListener('change', update)
   }, [reduceMotion])
 
+  const onPointerMove = (e: PointerEvent<HTMLElement>) => {
+    if (!enabled) return
+    const r = e.currentTarget.getBoundingClientRect()
+    rotateX.set(-((e.clientY - r.top) / r.height - 0.5) * 5)
+    rotateY.set(((e.clientX - r.left) / r.width - 0.5) * 5)
+  }
+
+  const onPointerLeave = () => {
+    rotateX.set(0)
+    rotateY.set(0)
+  }
+
   return (
     <div className="md:sticky" style={{ top: `calc(6rem + ${index * 1.75}rem)` }}>
       <motion.article
-        style={enabled ? { scale } : undefined}
+        onPointerMove={onPointerMove}
+        onPointerLeave={onPointerLeave}
+        style={
+          enabled ? { scale, rotateX, rotateY, transformPerspective: 1200 } : undefined
+        }
         className="origin-top overflow-hidden rounded-2xl border border-line bg-surface shadow-[0_30px_70px_-30px_rgba(0,0,0,0.7)]"
       >
         <div className="flex flex-col gap-1 border-b border-line px-7 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-10">

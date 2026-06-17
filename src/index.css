@@ -99,6 +99,12 @@ body {
   }
 }
 
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
 /* Scroll reveals for below-the-fold content. Built on CSS scroll-driven
    animations: where supported they reveal as the block enters; everywhere else
    the content is simply visible. No JS, no hydration cost. */
