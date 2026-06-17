@@ -1,11 +1,11 @@
-import { CONTACT } from "../data/content";
+import { CONTACT } from '../data/content'
 
 export default function Footer() {
   return (
-    <footer className="border-t border-edge/60">
-      <div className="mx-auto flex max-w-[1400px] flex-col items-start justify-between gap-3 px-6 py-10 sm:flex-row sm:items-center sm:px-10">
-        <p className="font-mono text-sm text-muted">
-          shayan<span className="text-accent">.valaie</span>
+    <footer className="border-t border-line">
+      <div className="mx-auto flex max-w-[1320px] flex-col items-start justify-between gap-3 px-6 py-10 sm:flex-row sm:items-center sm:px-10 lg:px-14">
+        <p className="font-mono text-sm">
+          SV<span className="text-accent">.</span>
         </p>
         <p className="text-sm text-muted">
           &copy; {new Date().getFullYear()} Shayan Valaie.
@@ -18,5 +18,5 @@ export default function Footer() {
         </a>
       </div>
     </footer>
-  );
+  )
 }

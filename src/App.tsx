@@ -9,6 +9,7 @@ import Footer from './components/Footer'
 export default function App() {
   return (
     <>
+      <div className="grain" aria-hidden />
       <Nav />
       <main>
         <Hero />

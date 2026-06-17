@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, type PointerEvent } from 'react'
 import {
   motion,
   useScroll,
@@ -6,89 +6,113 @@ import {
   useReducedMotion,
 } from 'motion/react'
 import { ArrowDown } from '@phosphor-icons/react'
-import ParticleField from './ParticleField'
-import MagneticButton from './MagneticButton'
+import Button from './Button'
 import { HERO } from '../data/content'
 
-const headlineWords = HERO.greeting.split(' ')
+const nameLines = HERO.name.split(' ')
 
 export default function Hero() {
-  const ref = useRef<HTMLElement>(null)
+  const sectionRef = useRef<HTMLElement>(null)
+  const overlayRef = useRef<HTMLSpanElement>(null)
   const reduceMotion = useReducedMotion()
+
   const { scrollYProgress } = useScroll({
-    target: ref,
+    target: sectionRef,
     offset: ['start start', 'end start'],
   })
+  const contentY = useTransform(scrollYProgress, [0, 1], [0, -70])
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0])
+  const auroraY = useTransform(scrollYProgress, [0, 1], [0, 140])
 
-  // Layered parallax: copy drifts up and fades, glow drifts slower.
-  const contentY = useTransform(scrollYProgress, [0, 1], [0, -120])
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0])
-  const glowY = useTransform(scrollYProgress, [0, 1], [0, 80])
+  // Move the violet "spotlight" mask to the cursor. Coordinates are written
+  // straight to the overlay's CSS variables, so this never re-renders React.
+  const onPointerMove = (e: PointerEvent<HTMLElement>) => {
+    const el = overlayRef.current
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    el.style.setProperty('--mx', `${e.clientX - r.left}px`)
+    el.style.setProperty('--my', `${e.clientY - r.top}px`)
+  }
+
+  const maskStyle = {
+    maskImage:
+      'radial-gradient(circle 150px at var(--mx, -300px) var(--my, -300px), #000 0%, #000 28%, transparent 72%)',
+    WebkitMaskImage:
+      'radial-gradient(circle 150px at var(--mx, -300px) var(--my, -300px), #000 0%, #000 28%, transparent 72%)',
+  }
 
   return (
     <section
-      ref={ref}
+      ref={sectionRef}
       id="top"
+      onPointerMove={onPointerMove}
       className="relative flex min-h-[100dvh] items-center overflow-hidden"
     >
       <motion.div
         aria-hidden
-        style={reduceMotion ? undefined : { y: glowY }}
+        style={reduceMotion ? undefined : { y: auroraY }}
         className="absolute inset-0"
       >
-        <div className="absolute -top-32 right-[-15%] h-[34rem] w-[34rem] rounded-full bg-accent-deep/25 blur-[140px]" />
-        <div className="absolute bottom-[-20%] left-[-10%] h-[28rem] w-[28rem] rounded-full bg-accent-deep/15 blur-[120px]" />
+        <div className="aurora absolute -left-[10%] top-[8%] h-[42rem] w-[42rem] rounded-full bg-accent-deep/22 blur-[150px]" />
+        <div className="aurora absolute -right-[12%] bottom-[2%] h-[34rem] w-[34rem] rounded-full bg-accent/12 blur-[140px]" />
       </motion.div>
-
-      <ParticleField />
 
       <motion.div
         style={reduceMotion ? undefined : { y: contentY, opacity: contentOpacity }}
-        className="relative z-10 mx-auto w-full max-w-[1400px] px-6 pt-16 sm:px-10 lg:pl-[8vw]"
+        className="relative z-10 mx-auto w-full max-w-[1320px] px-6 sm:px-10 lg:px-14"
       >
-        <h1 className="max-w-4xl text-5xl font-bold leading-[1.05] tracking-tighter sm:text-6xl lg:text-7xl">
-          {headlineWords.map((word, i) => (
-            <span key={i} className="inline-block overflow-hidden pb-1 align-bottom">
-              <motion.span
-                initial={reduceMotion ? false : { y: '100%' }}
-                animate={{ y: 0 }}
-                transition={{
-                  duration: 0.7,
-                  delay: 0.15 + i * 0.12,
-                  ease: [0.16, 1, 0.3, 1],
-                }}
-                className={`inline-block ${i === headlineWords.length - 1 ? 'text-accent' : ''}`}
+        <p
+          className="rise font-mono text-xs uppercase tracking-[0.28em] text-accent"
+          style={{ animationDelay: '0ms' }}
+        >
+          {HERO.role}
+        </p>
+
+        <h1 className="mt-6 select-none text-[clamp(3rem,11vw,8rem)] font-bold leading-[0.9] tracking-[-0.035em]">
+          {nameLines.map((line, i) => (
+            <span key={line} className="relative block">
+              <span
+                className="rise block"
+                style={{ animationDelay: `${120 + i * 90}ms` }}
               >
-                {word}
-                {i < headlineWords.length - 1 ? ' ' : ''}
-              </motion.span>
+                {line}
+              </span>
             </span>
           ))}
+          {/* Accent reveal layered over the whole name, masked to the cursor. */}
+          <span
+            ref={overlayRef}
+            aria-hidden
+            style={maskStyle}
+            className="pointer-events-none absolute inset-0 text-accent"
+          >
+            {nameLines.map((line) => (
+              <span key={line} className="block">
+                {line}
+              </span>
+            ))}
+          </span>
         </h1>
 
-        <motion.p
-          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6, ease: 'easeOut' }}
-          className="mt-6 max-w-xl text-lg leading-relaxed text-muted sm:text-xl"
+        <p
+          className="rise mt-8 max-w-xl text-lg leading-relaxed text-muted sm:text-xl"
+          style={{ animationDelay: '320ms' }}
         >
           {HERO.subtext}
-        </motion.p>
+        </p>
 
-        <motion.div
-          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.75, ease: 'easeOut' }}
-          className="mt-10 flex flex-wrap items-center gap-4"
+        <div
+          className="rise mt-10 flex flex-wrap items-center gap-4"
+          style={{ animationDelay: '420ms' }}
         >
-          <MagneticButton href="#experience" variant="primary">
-            View my experience
-            <ArrowDown size={18} weight="bold" />
-          </MagneticButton>
-          <MagneticButton href="#contact" variant="secondary">
-            Contact
-          </MagneticButton>
-        </motion.div>
+          <Button href="#experience" variant="primary">
+            View experience
+            <ArrowDown size={17} weight="bold" />
+          </Button>
+          <Button href="#contact" variant="secondary">
+            Get in touch
+          </Button>
+        </div>
       </motion.div>
     </section>
   )

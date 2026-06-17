@@ -5,36 +5,37 @@ export const NAV_LINKS = [
 ] as const
 
 export const HERO = {
-  greeting: "Hi, I'm Shayan.",
+  name: 'Shayan Valaie',
+  role: 'Senior Full-Stack Engineer',
   subtext:
-    'Software engineer crafting efficient, user-friendly applications that drive results.',
+    'I build scalable web and mobile products, multi-agent AI workflows, and the systems that run them.',
 }
 
 export const ABOUT = {
-  headline: 'Robust software, thoughtfully built.',
-  body: "As a dedicated software engineer, I've honed my expertise in a diverse set of programming languages and frameworks to deliver robust and scalable solutions. My passion lies in crafting efficient and user-friendly applications that drive results and enhance user experiences.",
+  headline: 'I design, build, and ship software end to end.',
+  body: "I'm a senior full-stack engineer who works across the whole stack, from the architecture of a React Native app to the agentic AI pipelines behind it. I care about systems that scale, interfaces that feel fast, and code that holds up in production.",
 }
 
 export const CAPABILITIES = [
   {
-    title: 'Frontend Development',
+    title: 'Full-Stack Engineering',
     description:
-      'Interfaces built with React and TypeScript, designed to feel fast and stay maintainable.',
+      'End-to-end features across frontend and backend, designed to scale and stay maintainable.',
   },
   {
-    title: 'Backend Development',
+    title: 'AI & Agentic Systems',
     description:
-      'APIs and services on Node, engineered for reliability and seamless data interchange.',
+      'Multi-agent workflows with deterministic orchestration and LLM processing for real product intelligence.',
   },
   {
-    title: 'Automation',
+    title: 'Web & Mobile',
     description:
-      'Pipelines and tooling that remove repetitive work and keep deployments predictable.',
+      'React, Next.js, and React Native apps with interfaces that feel fast and considered.',
   },
   {
-    title: 'SEO',
+    title: 'APIs & Cloud',
     description:
-      'Performance and structure tuned so the work actually gets found.',
+      'GraphQL and REST services across Azure, AWS, and GCP, tuned for latency and reliability.',
   },
 ] as const
 

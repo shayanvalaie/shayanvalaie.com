@@ -1,13 +1,17 @@
 import { useState, type FormEvent } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 import emailjs from '@emailjs/browser'
-import { PaperPlaneTilt, CircleNotch, EnvelopeSimple } from '@phosphor-icons/react'
+import {
+  PaperPlaneTilt,
+  CircleNotch,
+  ArrowUpRight,
+} from '@phosphor-icons/react'
 import { CONTACT } from '../data/content'
 
 type Status = 'idle' | 'sending' | 'sent' | 'error'
 
-const inputClasses =
-  'w-full rounded-xl border border-edge bg-raised px-4 py-3 text-ink placeholder:text-muted/60 outline-none transition-colors focus:border-accent/70'
+const field =
+  'w-full rounded-[10px] border border-line bg-surface px-4 py-3 text-ink placeholder:text-muted/55 outline-none transition-colors duration-200 focus:border-accent/70'
 
 export default function Contact() {
   const reduceMotion = useReducedMotion()
@@ -39,41 +43,40 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact" className="mx-auto max-w-[1400px] scroll-mt-24 px-6 py-28 sm:px-10 lg:py-40">
+    <section
+      id="contact"
+      className="mx-auto max-w-[1320px] scroll-mt-20 px-6 py-28 sm:px-10 lg:px-14 lg:py-44"
+    >
       <div className="grid gap-14 lg:grid-cols-12">
-        <motion.div
-          initial={reduceMotion ? false : { opacity: 0, y: 32 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.4 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          className="lg:col-span-5"
-        >
-          <h2 className="text-4xl font-bold tracking-tighter sm:text-5xl">
-            {CONTACT.headline}
+        <div className="reveal lg:col-span-5">
+          <h2 className="text-[clamp(1.9rem,4.5vw,3.25rem)] font-semibold tracking-[-0.025em]">
+            Get in touch
           </h2>
           <p className="mt-6 max-w-md text-lg leading-relaxed text-muted">
             {CONTACT.body}
           </p>
           <a
             href={`mailto:${CONTACT.email}`}
-            className="mt-8 inline-flex items-center gap-3 font-mono text-sm text-accent hover:underline"
+            className="group mt-8 inline-flex items-center gap-2 font-mono text-sm text-accent"
           >
-            <EnvelopeSimple size={20} />
-            {CONTACT.email}
+            <span className="border-b border-transparent transition-colors group-hover:border-accent">
+              {CONTACT.email}
+            </span>
+            <ArrowUpRight
+              size={16}
+              weight="bold"
+              className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+            />
           </a>
-        </motion.div>
+        </div>
 
-        <motion.form
+        <form
           onSubmit={handleSubmit}
-          initial={reduceMotion ? false : { opacity: 0, y: 32 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col gap-6 lg:col-span-7"
+          className="reveal flex flex-col gap-6 lg:col-span-7"
         >
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="flex flex-col gap-2">
-              <label htmlFor="name" className="text-sm font-medium text-ink">
+              <label htmlFor="name" className="text-sm font-medium">
                 Name
               </label>
               <input
@@ -83,11 +86,11 @@ export default function Contact() {
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="Ramin Aghazadeh"
-                className={inputClasses}
+                className={field}
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label htmlFor="email" className="text-sm font-medium text-ink">
+              <label htmlFor="email" className="text-sm font-medium">
                 Email
               </label>
               <input
@@ -97,12 +100,12 @@ export default function Contact() {
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 placeholder="you@example.com"
-                className={inputClasses}
+                className={field}
               />
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <label htmlFor="message" className="text-sm font-medium text-ink">
+            <label htmlFor="message" className="text-sm font-medium">
               Message
             </label>
             <textarea
@@ -111,8 +114,8 @@ export default function Contact() {
               rows={6}
               value={form.message}
               onChange={(e) => setForm({ ...form, message: e.target.value })}
-              placeholder="What would you like to build?"
-              className={`${inputClasses} resize-y`}
+              placeholder="What are you building?"
+              className={`${field} resize-y`}
             />
           </div>
 
@@ -120,36 +123,37 @@ export default function Contact() {
             <motion.button
               type="submit"
               disabled={status === 'sending'}
-              whileTap={{ scale: 0.97 }}
-              className="inline-flex items-center gap-2 rounded-full bg-accent px-7 py-3.5 text-[15px] font-semibold text-base transition-colors hover:bg-[#b9a3fb] disabled:opacity-60"
+              whileTap={reduceMotion ? undefined : { scale: 0.97 }}
+              transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
+              className="inline-flex items-center gap-2 rounded-full bg-ink px-7 py-3.5 text-[15px] font-medium text-bg transition-colors duration-200 hover:bg-white disabled:opacity-60"
             >
               {status === 'sending' ? (
                 <>
-                  <CircleNotch size={18} weight="bold" className="animate-spin" />
+                  <CircleNotch size={17} weight="bold" className="animate-spin" />
                   Sending
                 </>
               ) : (
                 <>
-                  <PaperPlaneTilt size={18} weight="bold" />
+                  <PaperPlaneTilt size={17} weight="bold" />
                   Send message
                 </>
               )}
             </motion.button>
 
-            <div aria-live="polite">
+            <div aria-live="polite" className="text-sm">
               {status === 'sent' && (
-                <p className="text-sm text-accent">
-                  Thank you. I will get back to you as soon as possible.
+                <p className="text-accent">
+                  Thanks. I&apos;ll get back to you shortly.
                 </p>
               )}
               {status === 'error' && (
-                <p className="text-sm text-red-400">
-                  Something went wrong. Please try again or email me directly.
+                <p className="text-red-400">
+                  Something went wrong. Email me directly instead.
                 </p>
               )}
             </div>
           </div>
-        </motion.form>
+        </form>
       </div>
     </section>
   )

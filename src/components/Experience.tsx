@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   motion,
   useScroll,
@@ -7,13 +7,13 @@ import {
   type MotionValue,
 } from 'motion/react'
 import { EXPERIENCE } from '../data/content'
-import { useMediaQuery } from '../hooks/useMediaQuery'
 
 /*
-  Sticky-stack: each role pins near the viewport top and scales back slightly
-  as the next one slides over it, so the history reads in sequence. Cards can
-  outgrow small viewports, where a pinned card's lower half would become
-  unreachable, so the stack only engages from md up.
+  Sticky-stack: each role pins near the top and scales back slightly as the
+  next slides over it, so the history reads in sequence. The scale transform
+  only engages on desktop with motion allowed; tall cards on a phone would
+  otherwise pin content out of reach. `enabled` starts false so the server and
+  first client render agree (no hydration mismatch).
 */
 function StackCard({
   index,
@@ -27,35 +27,41 @@ function StackCard({
   role: (typeof EXPERIENCE)[number]
 }) {
   const reduceMotion = useReducedMotion()
-  const stackEnabled = useMediaQuery('(min-width: 768px)')
-  const targetScale = 1 - (total - 1 - index) * 0.05
+  const [enabled, setEnabled] = useState(false)
+  const targetScale = 1 - (total - 1 - index) * 0.04
   const scale = useTransform(progress, [index / total, 1], [1, targetScale])
 
+  useEffect(() => {
+    if (reduceMotion) return
+    const mq = window.matchMedia('(min-width: 768px)')
+    const update = () => setEnabled(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [reduceMotion])
+
   return (
-    <div
-      className="md:sticky"
-      style={{ top: `calc(7rem + ${index * 2.25}rem)` }}
-    >
+    <div className="md:sticky" style={{ top: `calc(6rem + ${index * 1.75}rem)` }}>
       <motion.article
-        style={reduceMotion || !stackEnabled ? undefined : { scale }}
-        className="origin-top rounded-2xl border border-edge bg-raised p-8 shadow-[0_24px_60px_rgba(5,5,12,0.55)] sm:p-12"
+        style={enabled ? { scale } : undefined}
+        className="origin-top overflow-hidden rounded-2xl border border-line bg-surface shadow-[0_30px_70px_-30px_rgba(0,0,0,0.7)]"
       >
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
+        <div className="flex flex-col gap-1 border-b border-line px-7 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-10">
           <div>
-            <h3 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            <h3 className="text-xl font-semibold tracking-tight sm:text-2xl">
               {role.title}
             </h3>
-            <p className="mt-1 text-lg font-medium text-accent">
-              {role.company}
-            </p>
+            <p className="mt-1 text-accent">{role.company}</p>
           </div>
-          <p className="font-mono text-sm text-muted">{role.date}</p>
+          <p className="font-mono text-xs uppercase tracking-[0.12em] text-muted">
+            {role.date}
+          </p>
         </div>
-        <ul className="mt-8 grid gap-4 lg:grid-cols-2 lg:gap-x-10">
+        <ul className="grid gap-5 px-7 py-7 sm:px-10 lg:grid-cols-2 lg:gap-x-12">
           {role.points.map((point, i) => (
             <li
               key={i}
-              className="border-l-2 border-edge pl-4 leading-relaxed text-muted"
+              className="border-l border-line pl-4 leading-relaxed text-muted"
             >
               {point}
             </li>
@@ -68,25 +74,26 @@ function StackCard({
 
 export default function Experience() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const reduceMotion = useReducedMotion()
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end end'],
   })
 
   return (
-    <section id="experience" className="mx-auto max-w-[1400px] scroll-mt-24 px-6 py-28 sm:px-10 lg:py-40">
-      <motion.h2
-        initial={reduceMotion ? false : { opacity: 0, y: 32 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.5 }}
-        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        className="text-4xl font-bold tracking-tighter sm:text-5xl"
-      >
-        Work experience
-      </motion.h2>
+    <section
+      id="experience"
+      className="mx-auto max-w-[1320px] scroll-mt-20 px-6 py-28 sm:px-10 lg:px-14 lg:py-44"
+    >
+      <div className="reveal flex items-end justify-between gap-6">
+        <h2 className="text-[clamp(1.9rem,4.5vw,3.25rem)] font-semibold tracking-[-0.025em]">
+          Experience
+        </h2>
+        <p className="hidden font-mono text-xs uppercase tracking-[0.12em] text-muted sm:block">
+          {EXPERIENCE.length} roles
+        </p>
+      </div>
 
-      <div ref={containerRef} className="mt-16 flex flex-col gap-12">
+      <div ref={containerRef} className="mt-14 flex flex-col gap-10">
         {EXPERIENCE.map((role, i) => (
           <StackCard
             key={role.company}
