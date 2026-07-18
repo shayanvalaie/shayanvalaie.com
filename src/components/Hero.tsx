@@ -1,38 +1,46 @@
 import { useRef, type PointerEvent } from 'react'
-import {
-  motion,
-  useScroll,
-  useTransform,
-  useReducedMotion,
-} from 'motion/react'
 import { ArrowDown } from '@phosphor-icons/react'
 import Button from './Button'
 import HeroSceneLazy from './HeroSceneLazy'
+import { disabled } from '../flags'
 import { HERO } from '../data/content'
 
 const nameLines = HERO.name.split(' ')
 
+/*
+  The hero parallax/fade runs as CSS scroll-driven animations (.hero-content /
+  .hero-aurora in index.css), not JS. JS scroll handlers update transforms a
+  frame behind the compositor's scroll, which makes the hero visibly stutter
+  against the page; compositor-driven timelines stay perfectly in sync.
+*/
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null)
   const overlayRef = useRef<HTMLSpanElement>(null)
-  const reduceMotion = useReducedMotion()
-
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start start', 'end start'],
-  })
-  const contentY = useTransform(scrollYProgress, [0, 1], [0, -70])
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0])
-  const auroraY = useTransform(scrollYProgress, [0, 1], [0, 140])
 
   // Move the violet "spotlight" mask to the cursor. Coordinates are written
   // straight to the overlay's CSS variables, so this never re-renders React.
+  // The overlay rect is measured once on entry, not per move — pointermove can
+  // fire at 120Hz+ and each getBoundingClientRect is a layout read.
+  const rectRef = useRef<{ left: number; top: number; scrollY: number } | null>(
+    null,
+  )
+
+  const onPointerEnter = () => {
+    if (disabled('spotlight')) return
+    const r = overlayRef.current?.getBoundingClientRect()
+    rectRef.current = r
+      ? { left: r.left, top: r.top, scrollY: window.scrollY }
+      : null
+  }
+
   const onPointerMove = (e: PointerEvent<HTMLElement>) => {
     const el = overlayRef.current
-    if (!el) return
-    const r = el.getBoundingClientRect()
+    const r = rectRef.current
+    if (!el || !r) return
+    // window.scrollY compensates for scrolling mid-hover without a layout read.
+    const top = r.top - (window.scrollY - r.scrollY)
     el.style.setProperty('--mx', `${e.clientX - r.left}px`)
-    el.style.setProperty('--my', `${e.clientY - r.top}px`)
+    el.style.setProperty('--my', `${e.clientY - top}px`)
   }
 
   const maskStyle = {
@@ -46,17 +54,14 @@ export default function Hero() {
     <section
       ref={sectionRef}
       id="top"
+      onPointerEnter={onPointerEnter}
       onPointerMove={onPointerMove}
       className="relative flex min-h-[100dvh] items-center overflow-hidden"
     >
-      <motion.div
-        aria-hidden
-        style={reduceMotion ? undefined : { y: auroraY }}
-        className="absolute inset-0"
-      >
-        <div className="aurora absolute -left-[10%] top-[8%] h-[42rem] w-[42rem] rounded-full bg-accent-deep/22 blur-[150px]" />
-        <div className="aurora absolute -right-[12%] bottom-[2%] h-[34rem] w-[34rem] rounded-full bg-accent/12 blur-[140px]" />
-      </motion.div>
+      <div aria-hidden className="hero-aurora absolute inset-0">
+        <div className="aurora aurora-deep absolute -left-[10%] top-[8%] h-[42rem] w-[42rem]" />
+        <div className="aurora aurora-soft absolute -right-[12%] bottom-[2%] h-[34rem] w-[34rem]" />
+      </div>
 
       {/* WebGL centerpiece (desktop + motion only); aurora above is the fallback. */}
       <HeroSceneLazy />
@@ -68,10 +73,7 @@ export default function Hero() {
         className="absolute inset-0 bg-gradient-to-r from-bg via-bg/85 to-bg/20 md:to-transparent"
       />
 
-      <motion.div
-        style={reduceMotion ? undefined : { y: contentY, opacity: contentOpacity }}
-        className="relative z-10 mx-auto w-full max-w-[1320px] px-6 sm:px-10 lg:px-14"
-      >
+      <div className="hero-content relative z-10 mx-auto w-full max-w-[1320px] px-6 sm:px-10 lg:px-14">
         <p
           className="rise font-mono text-xs uppercase tracking-[0.28em] text-accent"
           style={{ animationDelay: '0ms' }}
@@ -124,7 +126,7 @@ export default function Hero() {
             Get in touch
           </Button>
         </div>
-      </motion.div>
+      </div>
     </section>
   )
 }

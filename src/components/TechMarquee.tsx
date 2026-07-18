@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import {
   motion,
   useAnimationFrame,
+  useInView,
   useMotionValue,
   useReducedMotion,
   useScroll,
@@ -9,7 +10,47 @@ import {
   useTransform,
   useVelocity,
 } from 'motion/react'
+import {
+  siDjango,
+  siDotnet,
+  siGo,
+  siGooglecloud,
+  siGraphql,
+  siJavascript,
+  siMongodb,
+  siNextdotjs,
+  siNodedotjs,
+  siPostgresql,
+  siPython,
+  siRabbitmq,
+  siReact,
+  siSolidity,
+  siTailwindcss,
+  siTypescript,
+} from 'simple-icons'
+import { disabled } from '../flags'
 import { TECHNOLOGIES } from '../data/content'
+
+/* Icons bundled from the simple-icons package: no runtime requests to a
+   third-party CDN, no icon pop-in while the strip is already moving. */
+const ICONS: Record<string, { path: string }> = {
+  typescript: siTypescript,
+  javascript: siJavascript,
+  go: siGo,
+  python: siPython,
+  react: siReact,
+  nextdotjs: siNextdotjs,
+  nodedotjs: siNodedotjs,
+  graphql: siGraphql,
+  dotnet: siDotnet,
+  django: siDjango,
+  tailwindcss: siTailwindcss,
+  rabbitmq: siRabbitmq,
+  postgresql: siPostgresql,
+  mongodb: siMongodb,
+  solidity: siSolidity,
+  googlecloud: siGooglecloud,
+}
 
 const wrap = (min: number, max: number, v: number) => {
   const range = max - min
@@ -21,6 +62,10 @@ const wrap = (min: number, max: number, v: number) => {
   up, scrolling up reverses it. Logos render twice for a seamless loop.
 */
 export default function TechMarquee() {
+  const sectionRef = useRef<HTMLElement>(null)
+  // Only advance the marquee while it's on screen; the rAF loop would
+  // otherwise run for the life of the page.
+  const inView = useInView(sectionRef)
   const reduceMotion = useReducedMotion()
   const baseX = useMotionValue(0)
   const { scrollY } = useScroll()
@@ -31,7 +76,7 @@ export default function TechMarquee() {
   const x = useTransform(baseX, (v) => `${wrap(-50, 0, v)}%`)
 
   useAnimationFrame((_, delta) => {
-    if (reduceMotion) return
+    if (reduceMotion || !inView || disabled('marquee')) return
     const vf = velocityFactor.get()
     if (vf < 0) direction.current = -1
     else if (vf > 0) direction.current = 1
@@ -42,6 +87,7 @@ export default function TechMarquee() {
 
   return (
     <section
+      ref={sectionRef}
       aria-label="Technologies"
       className="border-y border-line py-12"
     >
@@ -58,13 +104,16 @@ export default function TechMarquee() {
                   key={`${copy}-${tech.slug}`}
                   className="flex items-center gap-3 px-8 opacity-55 transition-opacity duration-300 hover:opacity-100"
                 >
-                  <img
-                    src={`https://cdn.simpleicons.org/${tech.slug}/97969F`}
-                    alt={tech.name}
+                  <svg
+                    role="img"
+                    aria-label={tech.name}
+                    viewBox="0 0 24 24"
                     width={24}
                     height={24}
-                    loading="lazy"
-                  />
+                    fill="#97969F"
+                  >
+                    <path d={ICONS[tech.slug].path} />
+                  </svg>
                   {!('iconOnly' in tech && tech.iconOnly) && (
                     <span className="whitespace-nowrap font-mono text-xs uppercase tracking-[0.12em] text-muted">
                       {tech.name}

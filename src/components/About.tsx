@@ -1,3 +1,4 @@
+import { disabled } from '../flags'
 import { ABOUT, CAPABILITIES } from '../data/content'
 
 export default function About() {
@@ -20,6 +21,7 @@ export default function About() {
           <li
             key={cap.title}
             onPointerMove={(e) => {
+              if (disabled('spotlight')) return
               const el = e.currentTarget
               const r = el.getBoundingClientRect()
               el.style.setProperty('--spot-x', `${e.clientX - r.left}px`)

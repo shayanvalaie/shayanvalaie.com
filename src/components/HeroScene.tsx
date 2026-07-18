@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
@@ -117,7 +117,7 @@ function Blob() {
 
   return (
     <mesh ref={mesh} scale={1.9} position={[1.25, 0, 0]}>
-      <icosahedronGeometry args={[1, 26]} />
+      <icosahedronGeometry args={[1, 10]} />
       <shaderMaterial
         vertexShader={vertexShader}
         fragmentShader={fragmentShader}
@@ -128,14 +128,32 @@ function Blob() {
 }
 
 export default function HeroScene() {
+  const wrapper = useRef<HTMLDivElement>(null)
+  // Render only while the hero is on screen; past it, the canvas would
+  // otherwise keep redrawing every frame and fight the scroll compositor.
+  const [frameloop, setFrameloop] = useState<'always' | 'never'>('always')
+
+  useEffect(() => {
+    const el = wrapper.current
+    if (!el) return
+    const io = new IntersectionObserver(([entry]) => {
+      setFrameloop(entry.isIntersecting ? 'always' : 'never')
+    })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+
   return (
-    <Canvas
-      dpr={[1, 1.8]}
-      camera={{ position: [0, 0, 4], fov: 45 }}
-      gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
-      style={{ position: 'absolute', inset: 0 }}
-    >
-      <Blob />
-    </Canvas>
+    <div ref={wrapper} style={{ position: 'absolute', inset: 0 }}>
+      <Canvas
+        frameloop={frameloop}
+        dpr={[1, 1.5]}
+        camera={{ position: [0, 0, 4], fov: 45 }}
+        gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+        style={{ position: 'absolute', inset: 0 }}
+      >
+        <Blob />
+      </Canvas>
+    </div>
   )
 }

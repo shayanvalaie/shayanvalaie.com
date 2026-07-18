@@ -7,6 +7,7 @@ import {
   useReducedMotion,
   type MotionValue,
 } from 'motion/react'
+import { disabled } from '../flags'
 import { EXPERIENCE } from '../data/content'
 
 /*
@@ -37,7 +38,7 @@ function StackCard({
   const rotateY = useSpring(0, { stiffness: 150, damping: 18, mass: 0.5 })
 
   useEffect(() => {
-    if (reduceMotion) return
+    if (reduceMotion || disabled('stack')) return
     const mq = window.matchMedia('(min-width: 768px)')
     const update = () => setEnabled(mq.matches)
     update()
@@ -58,7 +59,10 @@ function StackCard({
   }
 
   return (
-    <div className="md:sticky" style={{ top: `calc(6rem + ${index * 1.75}rem)` }}>
+    <div
+      className="stack-card md:sticky"
+      style={{ top: `calc(6rem + ${index * 1.75}rem)` }}
+    >
       <motion.article
         onPointerMove={onPointerMove}
         onPointerLeave={onPointerLeave}

@@ -21,7 +21,7 @@ export default function Nav() {
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
         scrolled
-          ? 'border-b border-line/70 bg-bg/75 backdrop-blur-md'
+          ? 'border-b border-line/70 bg-bg/90'
           : 'border-b border-transparent'
       }`}
     >
@@ -61,7 +61,7 @@ export default function Nav() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
-            className="border-b border-line bg-bg/95 px-6 pb-6 backdrop-blur-md sm:hidden"
+            className="border-b border-line bg-bg/95 px-6 pb-6 sm:hidden"
           >
             <ul className="flex flex-col gap-4 pt-2">
               {NAV_LINKS.map((link) => (
